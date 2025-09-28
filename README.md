@@ -1,4 +1,4 @@
-<img width="1475" height="777" alt="image" src="https://github.com/user-attachments/assets/e17210f1-4993-43c5-952b-c0d81a57902d" /># k58.ktp-baitap1_laptrinh_web
+
 
 BÀI TẬP VỀ NHÀ 01:
 
