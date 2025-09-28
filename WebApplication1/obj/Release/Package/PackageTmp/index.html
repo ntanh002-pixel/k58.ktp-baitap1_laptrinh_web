@@ -1,0 +1,493 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cá heo bám theo chuột </title>
+    <style>
+        :root {
+            --dolphin-w: 180px;
+            --dolphin-h: 100px;
+            --shadow-base: 0.7;
+            --accent: #9fe9ff;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.35), transparent 8%), linear-gradient(180deg, #bfefff 0%, #e6f9ff 50%, #dff7ff 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* wrapper */
+
+        .dolphin {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: var(--dolphin-w);
+            height: var(--dolphin-h);
+            pointer-events: none;
+            transform-origin: 50% 50%;
+            translate: -50% -50%;
+            will-change: transform, left, top;
+            filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.12));
+        }
+        /* dynamic shadow */
+
+        .shadow {
+            position: absolute;
+            left: 50%;
+            bottom: -6%;
+            width: 70%;
+            height: 18%;
+            background: rgba(0, 0, 0, 0.12);
+            border-radius: 50%;
+            filter: blur(6px);
+            transform: translateX(-50%) scale(var(--shadow-base));
+            transition: transform 200ms linear, opacity 200ms linear;
+        }
+        /* svg fills */
+
+        .dolphin svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            user-select: none
+        }
+        /* tail wag */
+
+        @keyframes tail-wag {
+            0% {
+                transform: rotate(-20deg)
+            }
+
+            50% {
+                transform: rotate(20deg)
+            }
+
+            100% {
+                transform: rotate(-20deg)
+            }
+        }
+
+        .tail {
+            transform-origin: 85% 55%;
+            animation-name: tail-wag;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+            animation-duration: 0.9s;
+        }
+        /* idle bob */
+
+        @keyframes bob {
+            0% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-3px)
+            }
+
+            100% {
+                transform: translateY(0)
+            }
+        }
+
+        .idle {
+            animation: bob 1.6s ease-in-out infinite;
+        }
+        /* pupil highlight */
+
+        .eye-highlight {
+            transition: transform 120ms linear;
+        }
+        /* ripple */
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            background: radial-gradient(circle, rgba(159, 233, 255, 0.7) 0%, rgba(159, 233, 255, 0.12) 45%, transparent 70%);
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 1;
+            will-change: transform, opacity;
+        }
+        /* bubbles */
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(159, 233, 255, 0.6));
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06) inset;
+        }
+        /* floating particles canvas sits behind */
+
+        #particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* UI credit */
+
+        .credit {
+            position: fixed;
+            right: 12px;
+            bottom: 10px;
+            font-size: 12px;
+            color: #065a73;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 6px 8px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            user-select: none;
+            z-index: 20;
+        }
+        /* accessibility */
+
+        @media (prefers-reduced-motion:reduce) {
+            .tail,
+            .idle {
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div>Nguyễn Tuấn Anh 002 - Cáo heo theo dõi con trỏ chuột</div>
+    <canvas id="particles"></canvas>
+
+    <div id="dolphin" class="dolphin" aria-hidden="true" role="img" aria-label="Cá heo bám theo chuột — Thiết kế Nguyễn Tuấn Anh" style="z-index:10;">
+        <div id="shadow" class="shadow"></div>
+
+        <!-- Inline SVG -->
+        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <defs>
+                <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.6" result="b" /><feBlend in="SourceGraphic" in2="b" /></filter>
+            </defs>
+
+            <g id="body">
+                <path id="body-shape" d="M30 60 C30 35, 70 20, 110 28 C150 36, 170 60, 150 78 C140 88, 120 95, 90 94 C70 93, 40 84, 30 60Z"
+                      fill="#4db8e6" stroke="#2b93c1" stroke-width="1.5" />
+                <path d="M55 68 C70 76, 95 78, 120 72 C126 70, 135 64, 140 60 C140 60, 112 70, 80 72 C60 73, 52 70, 55 68Z"
+                      fill="#e6fbff" opacity="0.95" />
+                <g id="eye" transform="translate(0,0)">
+                    <circle cx="85" cy="50" r="4.6" fill="#ffffff" />
+                    <circle id="pupil" cx="85" cy="50" r="2.6" fill="#04252b" class="eye-highlight" />
+                    <circle cx="83.2" cy="48.6" r="0.9" fill="#cfffff" opacity="0.95" />
+                </g>
+                <path d="M45 48 C63 44, 88 44, 110 48" stroke="#bff0ff" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.25" />
+            </g>
+
+            <g id="tail" class="tail" transform="translate(0,0)">
+                <path d="M150 78 C165 70, 180 78, 190 72 C180 86, 162 96, 150 78Z"
+                      fill="#4db8e6" stroke="#2b93c1" stroke-width="1.2" />
+            </g>
+
+            <g id="highlights" opacity="0.9">
+                <circle cx="120" cy="38" r="1.6" fill="#eaffff" opacity="0.95" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="credit">Design: Nguyễn Tuấn Anh</div>
+
+    <script>
+        (function () {
+            // elements
+            var wrapper = document.getElementById('dolphin');
+            var tail = document.getElementById('tail');
+            var shadow = document.getElementById('shadow');
+            var pupil = document.getElementById('pupil');
+            var canvas = document.getElementById('particles');
+            var ctx = canvas.getContext && canvas.getContext('2d');
+
+            // viewport & positions
+            var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+            var x = vw / 2,
+                y = vh / 2;
+            var targetX = x,
+                targetY = y;
+            var speed = 0.14;
+            var lastX = x,
+                lastY = y;
+
+            // particles arrays
+            var bubbles = [];
+            var particles = [];
+
+            // set canvas
+            function resizeCanvas() {
+                vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                canvas.width = vw;
+                canvas.height = vh;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // pointer handling
+            function setTarget(cx, cy) {
+                targetX = cx;
+                targetY = cy;
+            }
+            if (window.PointerEvent) {
+                document.addEventListener('pointermove', e => setTarget(e.clientX, e.clientY), {
+                    passive: true
+                });
+            } else {
+                document.addEventListener('mousemove', e => setTarget(e.clientX, e.clientY), {
+                    passive: true
+                });
+                document.addEventListener('touchmove', e => {
+                    if (e.touches && e.touches[0]) setTarget(e.touches[0].clientX, e.touches[0].clientY);
+                }, {
+                    passive: true
+                });
+            }
+
+            // ripple on click
+            document.addEventListener('click', function (e) {
+                createRipple(e.clientX, e.clientY);
+                spawnBubblesAt(e.clientX, e.clientY, 8);
+            }, {
+                passive: true
+            });
+
+            function createRipple(cx, cy) {
+                var r = document.createElement('div');
+                r.className = 'ripple';
+                var size = Math.max(80, Math.min(220, Math.hypot(vw, vh) * 0.08));
+                r.style.width = r.style.height = size + 'px';
+                r.style.left = cx + 'px';
+                r.style.top = cy + 'px';
+                document.body.appendChild(r);
+                requestAnimationFrame(() => {
+                    r.style.transition = 'transform 700ms cubic-bezier(.2,.8,.2,1), opacity 700ms linear';
+                    r.style.transform = 'translate(-50%,-50%) scale(1.8)';
+                    r.style.opacity = '0';
+                });
+                setTimeout(() => r.remove(), 800);
+            }
+
+            // DOM bubbles (sparkles)
+            function spawnBubblesAt(cx, cy, count) {
+                for (var i = 0; i < count; i++) {
+                    var b = document.createElement('div');
+                    b.className = 'bubble';
+                    var size = 6 + Math.random() * 18;
+                    b.style.width = b.style.height = size + 'px';
+                    b.style.left = cx + 'px';
+                    b.style.top = cy + 'px';
+                    document.body.appendChild(b);
+                    var angle = Math.random() * Math.PI * 2;
+                    var speed = 30 + Math.random() * 140;
+                    var life = 600 + Math.random() * 900;
+                    var start = performance.now();
+                    bubbles.push({
+                        el: b,
+                        x: cx,
+                        y: cy,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 40,
+                        life: life,
+                        start: start,
+                        size: size
+                    });
+                }
+            }
+
+            // small canvas background particles (floating soft lights)
+            function spawnParticle() {
+                var p = {
+                    x: Math.random() * vw,
+                    y: Math.random() * vh,
+                    r: 10 + Math.random() * 30,
+                    a: 0.05 + Math.random() * 0.2,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2
+                };
+                particles.push(p);
+            }
+            for (var i = 0; i < 14; i++) spawnParticle();
+
+            // pupil follow
+            function updatePupil(cx, cy) {
+                var rect = wrapper.getBoundingClientRect();
+                var centerX = rect.left + rect.width * 0.45;
+                var centerY = rect.top + rect.height * 0.45;
+                var dx = cx - centerX,
+                    dy = cy - centerY;
+                var max = 4;
+                var dist = Math.hypot(dx, dy);
+                var fx = dx / Math.max(1, dist) * Math.min(max, dist * 0.08);
+                var fy = dy / Math.max(1, dist) * Math.min(max, dist * 0.08);
+                // map to svg coords roughly
+                var cxVal = 85 + fx / (rect.width / 200);
+                var cyVal = 50 + fy / (rect.height / 120);
+                pupil.setAttribute('cx', cxVal);
+                pupil.setAttribute('cy', cyVal);
+            }
+
+            // spawn subtle head sparkles periodically
+            setInterval(function () {
+                var rect = wrapper.getBoundingClientRect();
+                var hx = rect.left + rect.width * 0.62 + (Math.random() - 0.5) * 20;
+                var hy = rect.top + rect.height * 0.28 + (Math.random() - 0.5) * 12;
+                spawnBubblesAt(hx, hy, 1);
+            }, 2200);
+
+            // tail trail
+            var tailCooldown = 0;
+
+            function maybeTailTrail(speedMag) {
+                tailCooldown--;
+                if (tailCooldown > 0) return;
+                tailCooldown = 4;
+                if (speedMag < 0.6) return;
+                var rect = wrapper.getBoundingClientRect();
+                var bx = rect.left + rect.width * 0.85 + (Math.random() - 0.5) * 10;
+                var by = rect.top + rect.height * 0.78 + (Math.random() - 0.5) * 6;
+                spawnBubblesAt(bx, by, 1);
+            }
+
+            // clamp helper
+            function clamp(v, min, max) {
+                return Math.max(min, Math.min(max, v));
+            }
+
+            // animate loop
+            function animate() {
+                // viewport refresh
+                vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+                // lerp movement
+                x += (targetX - x) * speed;
+                y += (targetY - y) * speed;
+
+                var dx = x - lastX,
+                    dy = y - lastY;
+                var dist = Math.hypot(dx, dy);
+
+                var halfW = wrapper.offsetWidth / 2 || 90;
+                var halfH = wrapper.offsetHeight / 2 || 50;
+                var drawX = clamp(x, halfW, vw - halfW);
+                var drawY = clamp(y, halfH, vh - halfH);
+
+                var angle = Math.atan2(targetY - y, targetX - x) || 0;
+                var deg = angle * 180 / Math.PI;
+                var maxTilt = 35;
+                deg = clamp(deg, -maxTilt, maxTilt);
+                var flip = (Math.cos(angle) < 0) ? -1 : 1;
+
+                wrapper.style.left = drawX + 'px';
+                wrapper.style.top = drawY + 'px';
+                wrapper.style.transform = 'translate(-50%,-50%) rotate(' + deg + 'deg) scaleX(' + flip + ')';
+
+                // tail animation speed reactive
+                var moveSpeed = Math.min(1, dist * 0.08);
+                var tailSpeed = 0.9 - moveSpeed * 0.65;
+                tail.style.animationDuration = (tailSpeed < 0.14 ? 0.14 : tailSpeed).toFixed(3) + 's';
+
+                // shadow dynamic
+                var shadowScale = 0.6 + moveSpeed * 0.6;
+                var shadowOpacity = 0.12 + moveSpeed * 0.35;
+                shadow.style.transform = 'translateX(-50%) scale(' + shadowScale.toFixed(3) + ')';
+                shadow.style.opacity = shadowOpacity.toFixed(3);
+
+                // idle bob toggle
+                if (dist < 0.6) wrapper.classList.add('idle');
+                else wrapper.classList.remove('idle');
+
+                // pupil follow
+                updatePupil(targetX, targetY);
+
+                // tail bubbles
+                maybeTailTrail(moveSpeed);
+
+                // update DOM bubbles
+                var now = performance.now();
+                for (var i = bubbles.length - 1; i >= 0; i--) {
+                    var p = bubbles[i];
+                    var t = now - p.start;
+                    if (t > p.life) {
+                        p.el.remove();
+                        bubbles.splice(i, 1);
+                        continue;
+                    }
+                    var frac = t / p.life;
+                    var nx = p.x + p.vx * (t / 1000);
+                    var ny = p.y + p.vy * (t / 1000) + frac * 40;
+                    var scale = 1 - frac;
+                    p.el.style.transform = 'translate3d(' + (nx - p.size / 2) + 'px,' + (ny - p.size / 2) + 'px,0) scale(' + scale.toFixed(3) + ')';
+                    p.el.style.opacity = (1 - frac).toFixed(3);
+                }
+
+                // draw canvas particles (soft floating lights)
+                if (ctx) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (var j = 0; j < particles.length; j++) {
+                        var q = particles[j];
+                        q.x += q.vx;
+                        q.y += q.vy;
+                        if (q.x < -q.r) q.x = vw + q.r;
+                        if (q.x > vw + q.r) q.x = -q.r;
+                        if (q.y < -q.r) q.y = vh + q.r;
+                        if (q.y > vh + q.r) q.y = -q.r;
+                        var grd = ctx.createRadialGradient(q.x, q.y, 0, q.x, q.y, q.r);
+                        grd.addColorStop(0, 'rgba(255,255,255,' + (q.a * 0.9) + ')');
+                        grd.addColorStop(0.6, 'rgba(159,233,255,' + (q.a * 0.6) + ')');
+                        grd.addColorStop(1, 'rgba(159,233,255,0)');
+                        ctx.fillStyle = grd;
+                        ctx.beginPath();
+                        ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                lastX = x;
+                lastY = y;
+                requestAnimationFrame(animate);
+            }
+
+            // initial sparkles to appear alive
+            setTimeout(function () {
+                for (var i = 0; i < 6; i++) {
+                    spawnBubblesAt(40 + Math.random() * 120, 40 + Math.random() * 80, 1);
+                }
+            }, 600);
+
+            // periodic gentle particle spawn
+            setInterval(function () {
+                if (particles.length < 22) spawnParticle();
+            }, 1800);
+
+            // init position center
+            x = vw / 2;
+            y = vh / 2;
+            targetX = x;
+            targetY = y;
+            wrapper.style.left = x + 'px';
+            wrapper.style.top = y + 'px';
+
+            requestAnimationFrame(animate);
+        })();
+    </script>
+</body>
+
+</html>

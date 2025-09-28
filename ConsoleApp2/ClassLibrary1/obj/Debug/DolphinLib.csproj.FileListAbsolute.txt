@@ -1,0 +1,6 @@
+D:\CAHEO\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.dll
+D:\CAHEO\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.pdb
+D:\CAHEO\ClassLibrary1\ClassLibrary1\obj\Debug\DolphinLib.csproj.AssemblyReference.cache
+D:\CAHEO\ClassLibrary1\ClassLibrary1\obj\Debug\DolphinLib.csproj.CoreCompileInputs.cache
+D:\CAHEO\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.dll
+D:\CAHEO\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.pdb
